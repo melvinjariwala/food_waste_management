@@ -11,11 +11,11 @@ class _historyState extends State<history> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 188, 120, 210),
+      backgroundColor: const Color.fromARGB(255, 238, 255, 236),
       appBar: AppBar(
         title: const Text("History"),
         centerTitle: true,
-        backgroundColor: const Color.fromARGB(255, 138, 0, 189),
+        backgroundColor: const Color.fromARGB(255, 100, 162, 93),
       ),
     );
   }

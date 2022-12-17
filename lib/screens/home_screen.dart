@@ -33,9 +33,9 @@ class _dashState extends State<dash> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        backgroundColor: const Color.fromARGB(255, 188, 120, 210),
+        backgroundColor: const Color.fromARGB(255, 238, 255, 236),
         drawer: Drawer(
-          backgroundColor: const Color.fromARGB(255, 188, 105, 213),
+          backgroundColor: const Color.fromARGB(255, 238, 255, 236),
           child: ListView(
             children: [
               Column(
@@ -59,7 +59,7 @@ class _dashState extends State<dash> {
                             color: Colors.black),
                       ),
                       currentAccountPicture: const CircleAvatar(
-                          child: Icon(Icons.account_circle_rounded,size: 42,), backgroundColor: Color.fromARGB(255, 138, 0, 189)),
+                          child: Icon(Icons.account_circle_rounded,size: 42,color: Color.fromARGB(255, 238, 255, 236),), backgroundColor: Color.fromARGB(255, 100, 162, 93)),
                     ),
                   ),
                 ],
@@ -68,13 +68,13 @@ class _dashState extends State<dash> {
                 padding: const EdgeInsets.fromLTRB(18.0,8.0,18.0,8.0),
                 child: Container(
                   decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 138, 0, 189),
+                      color: const Color.fromARGB(255, 100, 162, 93),
                       borderRadius: BorderRadius.circular(8.0),
                       boxShadow: const [
                         BoxShadow(
                           color: Colors.black,
                           spreadRadius: 0.3,
-                          blurRadius: 3,
+                          blurRadius: 1,
                         )
                       ]),
                   child: ListTile(
@@ -95,11 +95,11 @@ class _dashState extends State<dash> {
                 padding: const EdgeInsets.fromLTRB(18.0,8.0,18.0,8.0),
                 child: Container(
                   decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 138, 0, 189),
+                      color: const Color.fromARGB(255, 100, 162, 93),
                       borderRadius: BorderRadius.circular(8.0),
                       boxShadow: const [
                         BoxShadow(
-                            color: Colors.black, spreadRadius: 0.3, blurRadius: 3)
+                            color: Colors.black, spreadRadius: 0.3, blurRadius: 1)
                       ]),
                   child: ListTile(
                     leading: const Icon(CupertinoIcons.map,color: Colors.white,),
@@ -119,11 +119,11 @@ class _dashState extends State<dash> {
                 padding: const EdgeInsets.fromLTRB(18.0,8.0,18.0,8.0),
                 child: Container(
                   decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 138, 0, 189),
+                      color: const Color.fromARGB(255, 100, 162, 93),
                       borderRadius: BorderRadius.circular(8.0),
                       boxShadow: const [
                         BoxShadow(
-                            color: Colors.black, spreadRadius: 0.3, blurRadius: 3)
+                            color: Colors.black, spreadRadius: 0.3, blurRadius: 1)
                       ]),
                   child: ListTile(
                     leading: const Icon(Icons.question_answer_outlined,color: Colors.white,),
@@ -143,13 +143,13 @@ class _dashState extends State<dash> {
                 padding: const EdgeInsets.fromLTRB(18.0,8.0,18.0,8.0),
                 child: Container(
                     decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 138, 0, 189),
+                        color: const Color.fromARGB(255, 100, 162, 93),
                         borderRadius: BorderRadius.circular(8.0),
                         boxShadow: const [
                           BoxShadow(
                             color: Colors.black,
                             spreadRadius: 0.3,
-                            blurRadius: 3,
+                            blurRadius: 1,
                           )
                         ]),
                     child: ListTile(
@@ -169,9 +169,15 @@ class _dashState extends State<dash> {
           ),
         ),
         appBar: AppBar(
-          title: const Text("FEED"),
+          title: const Text(
+              "FEED",
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold
+            ),
+          ),
           centerTitle: true,
-          backgroundColor: const Color.fromARGB(255, 138, 0, 189),
+          backgroundColor: const Color.fromARGB(255, 100, 162, 93),
         ),
         body: Padding(
           padding: const EdgeInsets.all(10),
@@ -194,21 +200,23 @@ class _dashState extends State<dash> {
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(21.0)),
                                 borderSide:
-                                    BorderSide(color: Color.fromARGB(255, 138, 0, 189))),
+                                    BorderSide(color: Color.fromARGB(255, 100, 162, 93))),
                             focusedBorder: OutlineInputBorder(
                               borderRadius:
                                   BorderRadius.all(Radius.circular(21.0)),
-                              borderSide: BorderSide(color: Colors.deepPurple),
+                              borderSide: BorderSide(color: Color.fromARGB(255, 100, 162, 93)),
                             ),
                             labelText: 'Search',
-                            hintText: "Enter your desired location",
+                            labelStyle: TextStyle(
+                              color: Color.fromARGB(255, 100, 162, 93)
+                            ),
                           ),
                         ),
                       ),
                     ),
                     const Padding(
                       padding: EdgeInsets.all(12.0),
-                      child: Icon(Icons.search,color: Color.fromARGB(255, 138, 0, 189),),
+                      child: Icon(Icons.search,color: Color.fromARGB(255, 100, 162, 93),),
                     ),
                   ],
                 ),
@@ -225,7 +233,7 @@ class _dashState extends State<dash> {
                           BoxShadow(
                               color: Colors.black,
                               spreadRadius: 0.3,
-                              blurRadius: 3
+                              blurRadius: 1.2
                           )
                         ],
                     ),
@@ -292,7 +300,7 @@ class _dashState extends State<dash> {
                         BoxShadow(
                             color: Colors.black,
                             spreadRadius: 0.3,
-                            blurRadius: 3
+                            blurRadius: 1
                         )
                       ],
                     ),
@@ -359,7 +367,7 @@ class _dashState extends State<dash> {
                         BoxShadow(
                             color: Colors.black,
                             spreadRadius: 0.3,
-                            blurRadius: 3
+                            blurRadius: 1
                         )
                       ],
                     ),
@@ -426,7 +434,7 @@ class _dashState extends State<dash> {
                         BoxShadow(
                             color: Colors.black,
                             spreadRadius: 0.3,
-                            blurRadius: 3
+                            blurRadius: 1
                         )
                       ],
                     ),
@@ -493,7 +501,7 @@ class _dashState extends State<dash> {
                         BoxShadow(
                             color: Colors.black,
                             spreadRadius: 0.3,
-                            blurRadius: 3
+                            blurRadius: 1
                         )
                       ],
                     ),
@@ -560,7 +568,7 @@ class _dashState extends State<dash> {
                         BoxShadow(
                             color: Colors.black,
                             spreadRadius: 0.3,
-                            blurRadius: 3
+                            blurRadius: 1
                         )
                       ],
                     ),
@@ -627,7 +635,7 @@ class _dashState extends State<dash> {
                         BoxShadow(
                             color: Colors.black,
                             spreadRadius: 0.3,
-                            blurRadius: 3
+                            blurRadius: 1
                         )
                       ],
                     ),

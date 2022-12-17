@@ -1,3 +1,5 @@
+// ignore_for_file: camel_case_types
+
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:food_waste_management/screens/home_screen.dart';
@@ -60,7 +62,7 @@ class _login_screenState extends State<login_screen> {
           child: Text(
             'Login',
             style: TextStyle(
-                fontSize: 30, fontWeight: FontWeight.bold, color: Colors.white),
+                fontSize: 30, fontWeight: FontWeight.bold, color: Colors.black),
           ),
         ),
         Padding(
@@ -73,14 +75,18 @@ class _login_screenState extends State<login_screen> {
                 fillColor: Colors.white30,
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(21.0)),
-                  borderSide: BorderSide(color: Colors.deepPurple),
+                  borderSide:
+                      BorderSide(color: Color.fromARGB(255, 100, 162, 93)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(21.0)),
-                  borderSide: BorderSide(color: Colors.deepPurple),
+                  borderSide:
+                      BorderSide(color: Color.fromARGB(255, 100, 162, 93)),
                 ),
                 labelText: 'Enter Phone No.',
-                hintText: '+919876543210'),
+                labelStyle: TextStyle(color: Color.fromARGB(255, 100, 162, 93)),
+                hintText: '+919876543210',
+                hintStyle: TextStyle(color: Colors.grey)),
           ),
         ),
         Padding(
@@ -90,7 +96,8 @@ class _login_screenState extends State<login_screen> {
               borderRadius: BorderRadius.circular(21.0),
             ),
             child: ElevatedButton(
-                style: ElevatedButton.styleFrom(primary: const Color.fromARGB(255, 138, 0, 189)),
+                style: ElevatedButton.styleFrom(
+                    primary: const Color.fromARGB(255, 100, 162, 93)),
                 onPressed: () async {
                   setState(() {
                     showLoading = true;
@@ -121,7 +128,10 @@ class _login_screenState extends State<login_screen> {
                       },
                       codeAutoRetrievalTimeout: (verificationId) async {});
                 },
-                child: const Text("Login")),
+                child: const Text(
+                  "Login",
+                  style: TextStyle(color: Colors.white),
+                )),
           ),
         ),
         const Spacer(),
@@ -138,7 +148,7 @@ class _login_screenState extends State<login_screen> {
           child: Text(
             'Verify your Phone No.',
             style: TextStyle(
-                fontSize: 30, fontWeight: FontWeight.bold, color: Colors.white),
+                fontSize: 30, fontWeight: FontWeight.bold, color: Colors.black),
           ),
         ),
         Padding(
@@ -147,13 +157,15 @@ class _login_screenState extends State<login_screen> {
             length: 6,
             controller: otpController,
             showCursor: true,
+            // ignore: avoid_print
             onCompleted: (pin) => print(pin),
           ),
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: ElevatedButton(
-              style: ElevatedButton.styleFrom(primary: const Color.fromARGB(255, 138, 0, 189)),
+              style: ElevatedButton.styleFrom(
+                  primary: const Color.fromARGB(255, 100, 162, 93)),
               onPressed: () async {
                 PhoneAuthCredential phoneAuthCredential =
                     PhoneAuthProvider.credential(
@@ -162,14 +174,22 @@ class _login_screenState extends State<login_screen> {
                 signInWithPhoneAuthCredential(phoneAuthCredential);
                 currentstate = MobileVerificationState.SHOW_MOBILE_FORM_STATE;
               },
-              child: const Text("Verify")),
+              child: const Text(
+                "Verify",
+                style: TextStyle(color: Colors.white),
+              )),
         ),
         ElevatedButton(
-            style: ElevatedButton.styleFrom(primary: const Color.fromARGB(255, 138, 0, 189)),
-            onPressed: () {
-              currentstate = MobileVerificationState.SHOW_MOBILE_FORM_STATE;
-            },
-            child: const Text("Change Phone No.")),
+          style: ElevatedButton.styleFrom(
+              primary: const Color.fromARGB(255, 100, 162, 93)),
+          onPressed: () {
+            currentstate = MobileVerificationState.SHOW_MOBILE_FORM_STATE;
+          },
+          child: const Text(
+            "Change Phone No.",
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
         const Spacer(),
       ],
     );
@@ -178,15 +198,15 @@ class _login_screenState extends State<login_screen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   @override
   Widget build(BuildContext context) {
-
-    final defaultPinTheme = PinTheme(
+    final PinTheme defaultPinTheme = PinTheme(
       width: 56,
       height: 56,
       textStyle: const TextStyle(
           fontSize: 20,
-          color: Color.fromRGBO(30, 60, 87, 1),
+          color: Color.fromRGBO(40, 87, 30, 1.0),
           fontWeight: FontWeight.w600),
       decoration: BoxDecoration(
+        color: const Color.fromARGB(255, 119, 220, 102),
         border: Border.all(color: const Color.fromRGBO(234, 239, 243, 1)),
         borderRadius: BorderRadius.circular(20),
       ),
@@ -206,20 +226,25 @@ class _login_screenState extends State<login_screen> {
     return Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
-          title: const Text("Welcome to FEED"),
+          title: const Text(
+            "Welcome to FEED",
+            style: TextStyle(color: Colors.white),
+          ),
           centerTitle: true,
-          backgroundColor: const Color.fromARGB(255, 138, 0, 189),
+          backgroundColor: const Color.fromARGB(255, 100, 162, 93),
         ),
         body: Container(
           child: showLoading
               ? const Center(
-                  child: CircularProgressIndicator(color: Color.fromARGB(255, 138, 0, 189),),
+                  child: CircularProgressIndicator(
+                    color: Color.fromARGB(255, 100, 162, 93),
+                  ),
                 )
               : currentstate == MobileVerificationState.SHOW_MOBILE_FORM_STATE
                   ? getMobileFormWidget(context)
                   : getOtpFormWidget(context),
           padding: const EdgeInsets.all(8.0),
-          color: const Color.fromARGB(255, 188, 120, 210),
+          color: const Color.fromARGB(255, 238, 255, 236),
         ));
   }
 }
