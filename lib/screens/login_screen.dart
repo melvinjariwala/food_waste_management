@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:food_waste_management/screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:pinput/pinput.dart';
 
 enum MobileVerificationState {
@@ -28,6 +29,7 @@ class _login_screenState extends State<login_screen> {
   late String verificationId;
   bool showLoading = false;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  late String phoneNo;
 
   void signInWithPhoneAuthCredential(
       PhoneAuthCredential phoneAuthCredential) async {
@@ -65,7 +67,7 @@ class _login_screenState extends State<login_screen> {
                 fontSize: 30, fontWeight: FontWeight.bold, color: Colors.black),
           ),
         ),
-        Padding(
+        /*Padding(
           padding: const EdgeInsets.all(8.0),
           child: TextField(
             keyboardType: TextInputType.phone,
@@ -76,17 +78,62 @@ class _login_screenState extends State<login_screen> {
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(21.0)),
                   borderSide:
-                      BorderSide(color: Color.fromARGB(255, 100, 162, 93)),
+                  BorderSide(color: Color.fromARGB(255, 100, 162, 93)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(21.0)),
                   borderSide:
-                      BorderSide(color: Color.fromARGB(255, 100, 162, 93)),
+                  BorderSide(color: Color.fromARGB(255, 100, 162, 93)),
                 ),
                 labelText: 'Enter Phone No.',
                 labelStyle: TextStyle(color: Color.fromARGB(255, 100, 162, 93)),
                 hintText: '+919876543210',
                 hintStyle: TextStyle(color: Colors.grey)),
+          ),
+        ),*/
+        Padding(
+          padding: const EdgeInsets.fromLTRB(8.0, 21.0, 8.0, 8.0),
+          child: IntlPhoneField(
+            initialCountryCode: 'IN',
+            decoration: const InputDecoration(
+              filled: true,
+              fillColor: Colors.white30,
+              focusColor: Color.fromARGB(255, 108, 162, 93),
+              label: Text(
+                'Enter Phone No.',
+                style: TextStyle(
+                  color: Color.fromARGB(255, 108, 162, 93)
+                ),
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(21.0)),
+                borderSide: BorderSide(
+                  color: Color.fromARGB(255, 100, 162, 93)
+                )
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(21.0)),
+                borderSide: BorderSide(
+                  color : Color.fromARGB(255, 108, 162, 93)
+                )
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(21.0)),
+                borderSide: BorderSide(
+                  color: Color.fromARGB(255, 108, 162, 93)
+                )
+              )
+            ),
+
+            cursorColor: const Color.fromARGB(255, 108, 162, 93),
+            onChanged: (phone){
+              print(phone.countryCode);
+              print(phone.number);
+              print(phone.completeNumber);
+              print(phone.countryISOCode);
+              phoneNo = phone.completeNumber;
+            },
+
           ),
         ),
         Padding(
@@ -104,7 +151,7 @@ class _login_screenState extends State<login_screen> {
                   });
 
                   await _auth.verifyPhoneNumber(
-                      phoneNumber: phoneController.text,
+                      phoneNumber: phoneNo,
                       verificationCompleted: (phoneAuthCredential) async {
                         setState(() {
                           showLoading = false;
