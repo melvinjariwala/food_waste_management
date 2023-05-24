@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+//import 'package:food_waste_management/DatabaseManager/database_manager.dart';
 import 'package:food_waste_management/screens/detailed_view.dart';
 import 'package:food_waste_management/screens/faq.dart';
 import 'package:food_waste_management/screens/history.dart';
 import 'package:food_waste_management/screens/login_screen.dart';
 import 'package:food_waste_management/screens/order_tracking.dart';
+import 'package:food_waste_management/widgets/donation_tile.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() {
   runApp(const dash());
@@ -25,8 +28,226 @@ class _dashState extends State<dash> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   late String? phoneNo = _auth.currentUser!.phoneNumber;
   final searchController = TextEditingController();
+  final _db = FirebaseFirestore.instance;
+  late CollectionReference<Map<String, dynamic>> _donationsCollection;
+  List<Map<String,dynamic>> _donations = [];
+  List<Map<String,dynamic>> _filteredDonations = [];
+  int _requirement = 0;
 
-  get PhoneNumber => phoneNo;
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _foodController = TextEditingController();
+  final TextEditingController _quantityController = TextEditingController();
+  final TextEditingController _peopleController = TextEditingController();
+  final TextEditingController _reqController = TextEditingController();
+
+  get PhoneNumber => phoneNo ?? '';
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _reqController.text = _requirement.toString();
+    _donationsCollection = _db.collection('Donations').withConverter<Map<String,dynamic>>(
+        fromFirestore: (snapshot,_) => snapshot.data()!,
+        toFirestore: (data, _) => data
+    );
+    fetchAllDonations();
+  }
+
+  Future<void> fetchAllDonations() async {
+    try {
+      final querySnapshot = await _donationsCollection.get();
+      setState(() {
+        _donations = querySnapshot.docs.map((doc) => doc.data()).toList();
+      });
+      print(_donations.toString());
+    } catch (error) {
+      print('Error handling donations: $error');
+    }
+  }
+
+  Future<void> addDonation(
+      String name, String address, String food, int quantity, int people) async {
+    try {
+      final newDonation = {
+        'name': name,
+        'address': address,
+        'food': food,
+        'quantity': quantity,
+        'people': people,
+      };
+      await _donationsCollection.add(newDonation);
+      print('Donation added successfully');
+    } catch (error) {
+      print('Failed to add donation: $error');
+    }
+  }
+
+  void filterDonations(int requirement){
+    setState(() {
+      _filteredDonations.clear();
+
+      _filteredDonations = _donations.where((donation) => donation['people'] >= requirement).toList();
+    });
+  }
+
+  void incrementRequirement(){
+    setState(() {
+      _requirement++;
+      _reqController.text = _requirement.toString();
+      filterDonations(_requirement);
+    });
+  }
+
+  void decrementRequirement(){
+    setState(() {
+      _requirement--;
+      _reqController.text = _requirement.toString();
+      filterDonations(_requirement);
+    });
+  }
+
+  void showAddDonationDialog(){
+    showDialog(
+        context: context,
+        builder: (BuildContext context){
+          return AlertDialog(
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(32.0))
+            ),
+            backgroundColor: const Color.fromARGB(255, 238, 255, 236),
+            title: const Text(
+                "Add Donation",
+              style: TextStyle(
+                color: Color.fromARGB(255, 100, 162, 93)
+              ),
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: _nameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Name'
+                    ),
+                  ),
+                  TextField(
+                    controller: _addressController,
+                    decoration: const InputDecoration(
+                        labelText: 'Address'
+                    ),
+                  ),
+                  TextField(
+                    controller: _foodController,
+                    decoration: const InputDecoration(
+                        labelText: 'Food'
+                    ),
+                  ),
+                  TextField(
+                    controller: _quantityController,
+                    decoration: const InputDecoration(
+                        labelText: 'Quantity'
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                  TextField(
+                    controller: _peopleController,
+                    decoration: const InputDecoration(
+                        labelText: 'People'
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                  onPressed: (){
+                    Navigator.pop(context);
+                  },
+                  child: const Text(
+                      "Cancel",
+                    style: TextStyle(
+                      color: Color.fromARGB(255, 100, 162, 93)
+                    ),
+                  )
+              ),
+              TextButton(
+                  onPressed: (){
+                    String name = _nameController.text;
+                    String address = _addressController.text;
+                    String food = _foodController.text;
+                    int quantity = int.tryParse(_quantityController.text) ?? 0;
+                    int people = int.parse(_peopleController.text);
+                    addDonation(name, address, food, quantity, people);
+                    Navigator.pop(context);
+                  },
+                  child: const Text(
+                      "Add",
+                    style: TextStyle(
+                      color: Color.fromARGB(255, 100, 162, 93)
+                    ),
+                  )
+              ),
+            ],
+          );
+        },
+    );
+  }
+
+  void showFilterDialog(){
+    showDialog(context: context, builder: (BuildContext context){
+      return AlertDialog(
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(32.0))
+        ),
+        backgroundColor: const Color.fromARGB(255, 238, 255, 236),
+        title: const Text(
+            "Filter",
+          style: TextStyle(
+            color: Color.fromARGB(255, 100, 162, 93)
+          ),
+        ),
+        content: Flexible(
+          child: Row(
+            children: [
+              const Text("No. of people : "),
+              IconButton(onPressed: (){
+                setState(() {
+                  decrementRequirement();
+                });
+              },
+                  icon: const Icon(Icons.remove),color: const Color.fromARGB(255, 100, 162, 93),),
+              SizedBox(
+                width: 50,
+                child: TextField(
+                  controller: _reqController,
+                  textAlign: TextAlign.center,
+                  keyboardType: TextInputType.number,
+                  onChanged: (value){
+                    setState(() {
+                      _requirement = int.tryParse(value) ?? 0;
+                      filterDonations(_requirement);
+                    });
+                  },
+                ),
+              ),
+              IconButton(
+                  onPressed: (){
+                    setState(() {
+                      incrementRequirement();
+                    });
+                  },
+                  icon: const Icon(Icons.add, color: Color.fromARGB(255, 100, 162, 93))
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -183,524 +404,59 @@ class _dashState extends State<dash> {
           padding: const EdgeInsets.all(10),
           child: ListView(
             children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Flexible(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextField(
-                          autocorrect: true,
-                          controller: searchController,
-                          decoration: const InputDecoration(
-                            enabledBorder: OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(21.0)),
-                                borderSide:
-                                    BorderSide(color: Color.fromARGB(255, 100, 162, 93))),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(21.0)),
-                              borderSide: BorderSide(color: Color.fromARGB(255, 100, 162, 93)),
-                            ),
-                            labelText: 'Search',
-                            labelStyle: TextStyle(
-                              color: Color.fromARGB(255, 100, 162, 93)
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.all(12.0),
-                      child: Icon(Icons.search,color: Color.fromARGB(255, 100, 162, 93),),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                  padding: const EdgeInsets.all(8.0),
-                child: InkWell(
-                  child: Container(
-                    padding: const EdgeInsets.all(12.0),
-                    decoration: const BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.all(Radius.circular(21.0)),
-                        boxShadow: [
-                          BoxShadow(
-                              color: Colors.black,
-                              spreadRadius: 0.3,
-                              blurRadius: 1.2
-                          )
-                        ],
-                    ),
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(18.0),
-                          child: Column(
-                            children: const <Widget>[
-                              Text(
-                                  "Donor Name",
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold
-                                ),
-                              ),
-                              Text(
-                                  "Melvin Jariwala",
-                                style: TextStyle(
-                                  fontSize: 15
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                        const Spacer(),
-                        Padding(
-                          padding: const EdgeInsets.all(18.0),
-                          child: Column(
-                            children: const <Widget>[
-                              Text(
-                                  "Donor Address",
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold
-                                ),
-                              ),
-                              Text(
-                                  "126, Narayan Nagar",
-                                style: TextStyle(
-                                  fontSize: 15
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      ],
+              IconButton(
+                  onPressed: (){
+                    showFilterDialog();
+                  },
+                  icon: const Icon(Icons.filter_alt_rounded)),
+              Row(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: ListView.builder(
+                          scrollDirection: Axis.vertical,
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: _filteredDonations.length,
+                          itemBuilder: (context, index){
+                            final donation = _filteredDonations[index];
+                            print("Index : $index");
+                            print("Inside ListView.builder");
+                            print(_donations);
+                            print(donation);
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: DonationTile(name: donation['name'].toString(), address: donation['address'].toString(),food : donation['food'].toString(), quantity: donation['quantity'], people : donation['people']),
+                            );
+
+                          }),
                     ),
                   ),
-                  onTap: (){
-                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const detaild_view()));
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: InkWell(
-                  child: Container(
-                    padding: const EdgeInsets.all(12.0),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(21.0)),
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black,
-                            spreadRadius: 0.3,
-                            blurRadius: 1
-                        )
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(18.0),
-                          child: Column(
-                            children: const <Widget>[
-                              Text(
-                                "Donor Name",
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold
-                                ),
-                              ),
-                              Text(
-                                "Dharal Zaveri",
-                                style: TextStyle(
-                                    fontSize: 15
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                        const Spacer(),
-                        Padding(
-                          padding: const EdgeInsets.all(18.0),
-                          child: Column(
-                            children: const <Widget>[
-                              Text(
-                                "Donor Address",
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold
-                                ),
-                              ),
-                              Text(
-                                "B-4 Vishranti App.",
-                                style: TextStyle(
-                                    fontSize: 15
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  onTap: (){
-                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const detaild_view()));
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: InkWell(
-                  child: Container(
-                    padding: const EdgeInsets.all(12.0),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(21.0)),
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black,
-                            spreadRadius: 0.3,
-                            blurRadius: 1
-                        )
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(18.0),
-                          child: Column(
-                            children: const <Widget>[
-                              Text(
-                                "Donor Name",
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold
-                                ),
-                              ),
-                              Text(
-                                "Arunava Guhatha",
-                                style: TextStyle(
-                                    fontSize: 15
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                        const Spacer(),
-                        Padding(
-                          padding: const EdgeInsets.all(18.0),
-                          child: Column(
-                            children: const <Widget>[
-                              Text(
-                                "Donor Address",
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold
-                                ),
-                              ),
-                              Text(
-                                "B-4 Sai App.",
-                                style: TextStyle(
-                                    fontSize: 15
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  onTap: (){
-                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const detaild_view()));
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: InkWell(
-                  child: Container(
-                    padding: const EdgeInsets.all(12.0),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(21.0)),
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black,
-                            spreadRadius: 0.3,
-                            blurRadius: 1
-                        )
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(18.0),
-                          child: Column(
-                            children: const <Widget>[
-                              Text(
-                                "Donor Name",
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold
-                                ),
-                              ),
-                              Text(
-                                "Joy Toor",
-                                style: TextStyle(
-                                    fontSize: 15
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                        const Spacer(),
-                        Padding(
-                          padding: const EdgeInsets.all(18.0),
-                          child: Column(
-                            children: const <Widget>[
-                              Text(
-                                "Donor Address",
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold
-                                ),
-                              ),
-                              Text(
-                                "D-6 JoyCity App.",
-                                style: TextStyle(
-                                    fontSize: 15
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  onTap: (){
-                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const detaild_view()));
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: InkWell(
-                  child: Container(
-                    padding: const EdgeInsets.all(12.0),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(21.0)),
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black,
-                            spreadRadius: 0.3,
-                            blurRadius: 1
-                        )
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(18.0),
-                          child: Column(
-                            children: const <Widget>[
-                              Text(
-                                "Donor Name",
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold
-                                ),
-                              ),
-                              Text(
-                                "Vats Balar",
-                                style: TextStyle(
-                                    fontSize: 15
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                        const Spacer(),
-                        Padding(
-                          padding: const EdgeInsets.all(18.0),
-                          child: Column(
-                            children: const <Widget>[
-                              Text(
-                                "Donor Address",
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold
-                                ),
-                              ),
-                              Text(
-                                "G-6 Girdhar App.",
-                                style: TextStyle(
-                                    fontSize: 15
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  onTap: (){
-                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const detaild_view()));
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: InkWell(
-                  child: Container(
-                    padding: const EdgeInsets.all(12.0),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(21.0)),
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black,
-                            spreadRadius: 0.3,
-                            blurRadius: 1
-                        )
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(18.0),
-                          child: Column(
-                            children: const <Widget>[
-                              Text(
-                                "Donor Name",
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold
-                                ),
-                              ),
-                              Text(
-                                "Melvin Jariwala",
-                                style: TextStyle(
-                                    fontSize: 15
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                        const Spacer(),
-                        Padding(
-                          padding: const EdgeInsets.all(18.0),
-                          child: Column(
-                            children: const <Widget>[
-                              Text(
-                                "Donor Address",
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold
-                                ),
-                              ),
-                              Text(
-                                "126, Narayan Nagar",
-                                style: TextStyle(
-                                    fontSize: 15
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  onTap: (){
-                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const detaild_view()));
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: InkWell(
-                  child: Container(
-                    padding: const EdgeInsets.all(12.0),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(21.0)),
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black,
-                            spreadRadius: 0.3,
-                            blurRadius: 1
-                        )
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(18.0),
-                          child: Column(
-                            children: const <Widget>[
-                              Text(
-                                "Donor Name",
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold
-                                ),
-                              ),
-                              Text(
-                                "Melvin Jariwala",
-                                style: TextStyle(
-                                    fontSize: 15
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                        const Spacer(),
-                        Padding(
-                          padding: const EdgeInsets.all(18.0),
-                          child: Column(
-                            children: const <Widget>[
-                              Text(
-                                "Donor Address",
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold
-                                ),
-                              ),
-                              Text(
-                                "126, Narayan Nagar",
-                                style: TextStyle(
-                                    fontSize: 15
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  onTap: (){
-                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const detaild_view()));
-                  },
-                ),
+                ],
               )
+
             ],
           ),
         ),
-
-        /*floatingActionButton: FloatingActionButton(
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: const Color.fromARGB(255, 100, 162, 93),
             onPressed: (){
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const current_booking()));
+              showAddDonationDialog();
             },
-            child: Icon(CupertinoIcons.ticket_fill),
-        ),*/
+          child: const Icon(Icons.add),
+        ),
+
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _addressController.dispose();
+    _foodController.dispose();
+    _quantityController.dispose();
+    _peopleController.dispose();
+    super.dispose();
   }
 }
