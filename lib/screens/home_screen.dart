@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-//import 'package:food_waste_management/DatabaseManager/database_manager.dart';
-import 'package:food_waste_management/screens/detailed_view.dart';
 import 'package:food_waste_management/screens/faq.dart';
 import 'package:food_waste_management/screens/history.dart';
-import 'package:food_waste_management/screens/login_screen.dart';
 import 'package:food_waste_management/screens/order_tracking.dart';
 import 'package:food_waste_management/widgets/donation_tile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -199,51 +196,72 @@ class _dashState extends State<dash> {
 
   void showFilterDialog(){
     showDialog(context: context, builder: (BuildContext context){
-      return AlertDialog(
+      return Dialog(
+
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(32.0))
         ),
         backgroundColor: const Color.fromARGB(255, 238, 255, 236),
-        title: const Text(
-            "Filter",
-          style: TextStyle(
-            color: Color.fromARGB(255, 100, 162, 93)
-          ),
-        ),
-        content: Flexible(
-          child: Row(
-            children: [
-              const Text("No. of people : "),
-              IconButton(onPressed: (){
-                setState(() {
-                  decrementRequirement();
-                });
-              },
-                  icon: const Icon(Icons.remove),color: const Color.fromARGB(255, 100, 162, 93),),
-              SizedBox(
-                width: 50,
-                child: TextField(
-                  controller: _reqController,
-                  textAlign: TextAlign.center,
-                  keyboardType: TextInputType.number,
-                  onChanged: (value){
-                    setState(() {
-                      _requirement = int.tryParse(value) ?? 0;
-                      filterDonations(_requirement);
-                    });
-                  },
+
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Text(
+                  'Filter',
+                style: TextStyle(
+                  color: Color.fromARGB(255, 100, 162, 93),
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              IconButton(
-                  onPressed: (){
+            ),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 24.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                      "No. of people : ",
+                    style: TextStyle(
+                      fontSize: 15
+                    ),
+                  ),
+                  IconButton(onPressed: (){
                     setState(() {
-                      incrementRequirement();
+                      decrementRequirement();
                     });
                   },
-                  icon: const Icon(Icons.add, color: Color.fromARGB(255, 100, 162, 93))
+                    icon: const Icon(Icons.remove),color: const Color.fromARGB(255, 100, 162, 93),),
+                  SizedBox(
+                    width: 50,
+                    child: TextField(
+                      controller: _reqController,
+                      textAlign: TextAlign.center,
+                      keyboardType: TextInputType.number,
+                      onChanged: (value){
+                        setState(() {
+                          _requirement = int.tryParse(value) ?? 0;
+                          filterDonations(_requirement);
+                        });
+                      },
+                    ),
+                  ),
+                  IconButton(
+                      onPressed: (){
+                        setState(() {
+                          incrementRequirement();
+                        });
+                      },
+                      icon: const Icon(Icons.add, color: Color.fromARGB(255, 100, 162, 93))
+                  ),
+                ],
               ),
-            ],
-          ),
+            )
+
+          ],
         ),
       );
     });
@@ -404,11 +422,41 @@ class _dashState extends State<dash> {
           padding: const EdgeInsets.all(10),
           child: ListView(
             children: <Widget>[
-              IconButton(
-                  onPressed: (){
-                    showFilterDialog();
-                  },
-                  icon: const Icon(Icons.filter_alt_rounded)),
+              Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Material(
+                    elevation: 6,
+                    borderRadius: const BorderRadius.all(Radius.circular(32.0)),
+                    child: ElevatedButton(
+                        onPressed: (){
+                          showFilterDialog();
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Text(
+                                "Filter ",
+                                style: TextStyle(
+                                    fontSize: 17
+                                ),
+                              ),
+                              Icon(Icons.filter_alt_outlined)
+                            ],
+                          ),
+                        ),
+                        style: ButtonStyle(
+                            backgroundColor: const MaterialStatePropertyAll<Color>(Color.fromARGB(255, 100, 162, 93)),
+                            shape: MaterialStatePropertyAll<RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(32.0)
+                                )
+                            )
+                        )
+                    ),
+                  )
+              ),
               Row(
                 children: [
                   Expanded(
